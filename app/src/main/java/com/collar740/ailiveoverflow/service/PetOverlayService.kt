@@ -7,10 +7,9 @@ import android.graphics.*
 import android.os.*
 import android.provider.Settings
 import android.util.Log
-import android.view.*
+import androview.*i
 import androidx.core.app.NotificationCompat
 import org.json.JSONObject
 import java.io.*;
 import java.net.*;
-import java.util.*;
-import kotlin.concurrent.thread;
+import java.util.*;kotlin.concurrent.thread;
