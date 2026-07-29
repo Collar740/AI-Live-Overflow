@@ -107,7 +107,8 @@ class PetOverlayService : Service() {
                 }
             }
             loadUrl("file:///android_asset/pet.html")
-            setOnTouchListener(createTouchListener())
+            // 让 WebView 直接处理 touch 事件传给 JS，
+            // 不再在 Kotlin 层拦截，否则 JS 收不到 touch 事件。
         }
 
         windowManager?.addView(overlayView, params)
