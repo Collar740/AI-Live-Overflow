@@ -5,84 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:transparent;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-#pet{position:absolute;width:180px;height:240px;cursor:pointer}
-#pet img{width:100%;height:100%;object-fit:contain;display:block}
+html,body{width:100%;height:100%;background:transparent;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+#pet{position:absolute;left:0;top:0;width:180px;height:240px;cursor:pointer;transform-origin:center center}
+#pet img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
 </style>
 </head>
 <body>
 <div id="pet"><img id="pet-img" src="pet_frames/frame_01.png"></div>
 <script>
-var frames = [];
-for (var i = 1; i <= 12; i++) frames.push(i);
-for (var i = 626; i <= 657; i++) frames.push(i);
-var total = frames.length;
-var idx = 0;
-var petImg = document.getElementById('pet-img');
-function pad(n) { return n < 10 ? '0' + n : String(n); }
-function nextFrame() {
-    idx = (idx + 1) % total;
-    petImg.src = 'pet_frames/frame_' + pad(frames[idx]) + '.png';
-}
-var tapTimer = null, isLong = false;
-var pet = document.getElementById('pet');
-function endHandler() {
-    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
-    if (!isLong) { nextFrame(); }
-}
-pet.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) return;
-    isLong = false;
-    tapTimer = setTimeout(function(){ isLong = true }, 500);
-}, {passive:true});
-pet.addEventListener('touchend', endHandler, {passive:true});
-pet.addEventListener('touchmove', function(e) {
-    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
-}, {passive:true});
-pet.addEventListener('mousedown', function() {
-    isLong = false;
-    tapTimer = setTimeout(function(){ isLong=true }, 500);
-});
-pet.addEventListener('mouseup', endHandler);
-pet.addEventListener('mouseleave', function() {
-    if (tapTimer) { clearTimeout(tapTimer); tapTimer=null; }
-});
-
-// 拖拽
-var isDragging=false, startX, startY, startLeft, startTop;
-pet.addEventListener('touchstart', function(e){
-    if(e.touches.length===1 && !tapTimer) {
-        isDragging=true;
-        startX=e.touches[0].clientX;
-        startY=e.touches[0].clientY;
-        startLeft=pet.offsetLeft;
-        startTop=pet.offsetTop;
+var frames=[];
+for(var i=1;i<=12;i++)frames.push(i);
+for(var i=626;i<=657;i++)frames.push(i);
+var total=frames.length;
+var idx=0;
+var pet=document.getElementById('pet');
+var petImg=document.getElementById('pet-img');
+var defaultLeft=(window.innerWidth-180)/2;
+var defaultTop=(window.innerHeight-240)/2;
+pet.style.left=defaultLeft+'px';
+pet.style.top=defaultTop+'px';
+function pad(n){return n<10?'0'+n:String(n)}
+function nextFrame(){idx=(idx+1)%total;petImg.src='pet_frames/frame_'+pad(frames[idx])+'.png';}
+var mode='none';
+var startX=0,startY=0,startLeft=0,startTop=0;
+var lastDist=0,currentScale=1;
+var moved=false;
+var longTimer=null;
+var longThreshold=8;
+pet.addEventListener('touchstart',function(e){
+  e.preventDefault();
+  if(e.touches.length===1){
+    moved=false;mode='tap';
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+    startLeft=pet.offsetLeft;startTop=pet.offsetTop;
+    if(longTimer)clearTimeout(longTimer);
+    longTimer=setTimeout(function(){if(!moved)mode='long';},500);
+  }else if(e.touches.length===2){
+    mode='pinch';
+    if(longTimer){clearTimeout(longTimer);longTimer=null;}
+    lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  }
+},{passive:false});
+pet.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  if(mode==='pinch'&&e.touches.length===2){
+    var dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    currentScale*=dist/lastDist;
+    currentScale=Math.max(0.3,Math.min(5,currentScale));
+    pet.style.transform='scale('+currentScale+')';
+    lastDist=dist;
+    return;
+  }
+  if(mode==='tap'||mode==='drag'){
+    var dx=Math.abs(e.touches[0].clientX-startX);
+    var dy=Math.abs(e.touches[0].clientY-startY);
+    if(dx>longThreshold||dy>longThreshold){
+      mode='drag';moved=true;
+      if(longTimer){clearTimeout(longTimer);longTimer=null;}
     }
-}, {passive:true});
-pet.addEventListener('touchmove', function(e){
-    if(isDragging && e.touches.length===1) {
-        pet.style.left=(startLeft+e.touches[0].clientX-startX)+'px';
-        pet.style.top=(startTop+e.touches[0].clientY-startY)+'px';
+    if(mode==='drag'){
+      pet.style.left=(startLeft+e.touches[0].clientX-startX)+'px';
+      pet.style.top=(startTop+e.touches[0].clientY-startY)+'px';
     }
-}, {passive:true});
-pet.addEventListener('touchend', function(){ isDragging=false }, {passive:true});
-
-// 双指缩放
-var lastDist=0, currentScale=1;
-pet.addEventListener('touchstart', function(e){
-    if(e.touches.length===2) {
-        lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-    }
-}, {passive:true});
-pet.addEventListener('touchmove', function(e){
-    if(e.touches.length===2) {
-        var dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        currentScale*=dist/lastDist;
-        currentScale=Math.max(0.3,Math.min(5,currentScale));
-        pet.style.transform='scale('+currentScale+')';
-        lastDist=dist;
-    }
-}, {passive:true});
+  }
+},{passive:false});
+pet.addEventListener('touchend',function(e){
+  e.preventDefault();
+  if(longTimer){clearTimeout(longTimer);longTimer=null;}
+  if(mode==='tap')nextFrame();
+  mode='none';
+},{passive:false});
+pet.addEventListener('touchcancel',function(e){
+  if(longTimer){clearTimeout(longTimer);longTimer=null;}
+  mode='none';
+},{passive:false});
 </script>
 </body>
 </html>
