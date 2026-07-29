@@ -341,8 +341,8 @@ class PetOverlayService : Service() {
                 val url = URL("https://kehhbwgfhjmvkxneqlyd.supabase.co/rest/v1/clawd_state?machine_id=eq.qisli&order=updated_at.desc&limit=1")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "GET"
-                conn.setRequestProperty("apikey", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
-                conn.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
+                conn.setRequestProperty("apikey", eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ)
+                conn.setRequestProperty("Authorization", "Bearer your-service-role-key")
                 conn.connectTimeout = 3000
                 conn.readTimeout = 3000
                 val response = conn.inputStream.bufferedReader().readText()
@@ -415,8 +415,8 @@ class PetOverlayService : Service() {
                 val url = URL("https://kehhbwgfhjmvkxneqlyd.supabase.co/rest/v1/clawd_events")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
-                conn.setRequestProperty("apikey", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
-                conn.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
+                conn.setRequestProperty("apikey", eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ)
+                conn.setRequestProperty("Authorization", "Bearer your-service-role-key")
                 conn.setRequestProperty("Content-Type", "application/json")
                 conn.outputStream.write("{\"machine_id\":\"qisli\",\"event_type\":\"$type\",\"event_data\":$json}".toByteArray())
             } catch (e: Exception) {
@@ -436,8 +436,8 @@ class PetOverlayService : Service() {
                 val url = URL("https://kehhbwgfhjmvkxneqlyd.supabase.co/rest/v1/clawd_dialogue_log")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
-                conn.setRequestProperty("apikey", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
-                conn.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ")
+                conn.setRequestProperty("apikey", eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaGhid2dmaGptdmt4bmVxbHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDU4NDksImV4cCI6MjEwMDgyMTg0OX0.ye5HAZkgnH6_aqPpX5y4fcAtOagehB6aqX7WE7EjBXQ)
+                conn.setRequestProperty("Authorization", "Bearer your-service-role-key")
                 conn.setRequestProperty("Content-Type", "application/json")
                 conn.outputStream.write(json.toString().toByteArray())
             } catch (e: Exception) {

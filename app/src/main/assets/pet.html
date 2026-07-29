@@ -7,56 +7,43 @@ body{margin:0;padding:0;background:transparent;overflow:hidden;user-select:none;
 #pw{width:180px;height:240px;position:relative;cursor:pointer;}
 #bb{position:absolute;top:-50px;left:50%;transform:translateX(-50%);background:#fff;border-radius:12px;padding:6px 14px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.12);opacity:0;transition:opacity .5s;pointer-events:none;z-index:2;max-width:300px;text-align:center;line-height:1.4;}
 #bb.show{opacity:1;}
-svg{width:180px;height:240px;}
+#petImg{width:180px;height:240px;object-fit:contain;}
 </style>
 </head>
 <body>
 <div id="pw">
 <div id="bb"></div>
-<svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
-<ellipse cx="90" cy="160" rx="50" ry="55" fill="#FFEECC" stroke="#E8CCAA" stroke-width="1"/>
-<circle cx="90" cy="95" r="42" fill="#FFF5E6" stroke="#E8CCAA" stroke-width="1"/>
-<path d="M55,70 L40,30 L70,58 Z" fill="#FFF5E6" stroke="#E8CCAA" stroke-width="1"/>
-<path d="M125,70 L140,30 L110,58 Z" fill="#FFF5E6" stroke="#E8CCAA" stroke-width="1"/>
-<path d="M58,66 L46,35 L68,58 Z" fill="#FFCCAA"/>
-<path d="M122,66 L134,35 L112,58 Z" fill="#FFCCAA"/>
-<g id="eyes"><circle cx="75" cy="90" r="4" fill="#333"/><circle cx="105" cy="90" r="4" fill="#333"/><circle cx="76" cy="89" r="1.5" fill="#FFF"/><circle cx="106" cy="89" r="1.5" fill="#FFF"/></g>
-<g id="eh" style="display:none"><path d="M70,88 Q75,94 80,88" stroke="#333" stroke-width="2" fill="none"/><path d="M100,88 Q105,94 110,88" stroke="#333" stroke-width="2" fill="none"/></g>
-<g id="es" style="display:none"><path d="M70,92 L80,92" stroke="#333" stroke-width="2"/><path d="M100,92 L110,92" stroke="#333" stroke-width="2"/></g>
-<path id="mo" d="M82,108 Q90,115 98,108" stroke="#CC8866" stroke-width="1.5" fill="none"/>
-<circle cx="65" cy="102" r="6" fill="#FFCCCC" opacity="0.4"/>
-<circle cx="115" cy="102" r="6" fill="#FFCCCC" opacity="0.4"/>
-<g id="tl"><path d="M130,170 Q170,130 165,90" stroke="#FFF5E6" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M135,180 Q180,150 175,100" stroke="#FFF5E6" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M125,190 Q165,165 160,115" stroke="#FFF5E6" stroke-width="6" fill="none" stroke-linecap="round"/></g>
-<ellipse cx="70" cy="200" rx="14" ry="10" fill="#FFF5E6" stroke="#E8CCAA" stroke-width="1"/>
-<ellipse cx="110" cy="200" rx="14" ry="10" fill="#FFF5E6" stroke="#E8CCAA" stroke-width="1"/>
-<g id="zz" style="display:none"><text x="130" y="70" font-size="18" fill="#AAA">z</text><text x="142" y="58" font-size="14" fill="#AAA">z</text><text x="150" y="48" font-size="10" fill="#AAA">z</text></g>
-</svg>
+<img id="petImg" src="pet_frames/frame_01.png" />
 </div>
 <script>
 var _t=null;var bb=document.getElementById('bb');
+var petImg=document.getElementById('petImg');
+var frameIdx=0;var totalFrames=12;var animTimer=null;
 function showBubble(t){if(!t){bb.classList.remove('show');return}bb.textContent=t;bb.classList.add('show');clearTimeout(_t);_t=setTimeout(function(){bb.classList.remove('show')},5000)}
-function setExpr(n){
-  var ey='eyes',eh='eh',es='es';
-  document.getElementById(ey).style.display=(n==='happy'||n==='love')?'none':'';
-  document.getElementById(eh).style.display=(n==='happy'||n==='love')?'':'none';
-  document.getElementById(es).style.display=n==='sleep'?'':'none';
-  document.getElementById('zz').style.display=n==='sleep'?'':'none';
-}
+function setFrame(n){frameIdx=((n-1)%totalFrames+totalFrames)%totalFrames+1;petImg.src='pet_frames/frame_'+String(frameIdx).padStart(2,'0')+'.png'}
+function startAnim(interval){stopAnim();animTimer=setInterval(function(){frameIdx=frameIdx%totalFrames+1;petImg.src='pet_frames/frame_'+String(frameIdx).padStart(2,'0')+'.png'},interval)}
+function stopAnim(){if(animTimer){clearInterval(animTimer);animTimer=null}}
 window.petEngine={
-  onTap:function(){showBubble('别戳我。');setExpr('annoyed')},
-  onDoubleTap:function(){showBubble('干嘛。');setExpr('happy')},
-  onLongPress:function(){showBubble('……');setExpr('shy')},
-  setState:function(e,b,h,m){setExpr(e);showBubble(b)},
+  onTap:function(){showBubble('别戳我。');startAnim(150)},
+  onDoubleTap:function(){showBubble('干嘛。');startAnim(80)},
+  onLongPress:function(){showBubble('……');startAnim(200)},
+  setState:function(e,b,h,m){
+    if(e==='idle'){startAnim(300)}
+    else if(e==='sleep'){stopAnim();setFrame(1)}
+    else if(e==='happy'||e==='love'){startAnim(100)}
+    else{startAnim(200)}
+    if(b)showBubble(b)
+  },
   setBubble:function(t){showBubble(t)},
   playAnimation:function(n){
     var el=document.getElementById('pw');el.style.transition='transform 0.2s';
     if(n==='screenshot'){el.style.transform='rotate(-5deg)';setTimeout(function(){el.style.transform=''},300)}
     else if(n==='wake'){el.style.transform='scale(1.05)';setTimeout(function(){el.style.transform=''},300)}
-    else if(n==='sleep'){setExpr('sleep')}
+    else if(n==='sleep'){stopAnim();setFrame(1)}
     else{el.style.transform='translateY(-8px)';setTimeout(function(){el.style.transform=''},200)}
   }
 };
-setExpr('idle');
+startAnim(300);
 </script>
 </body>
 </html>
