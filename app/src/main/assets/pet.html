@@ -8,148 +8,80 @@
 body{background:transparent;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #pet{position:absolute;width:180px;height:240px;cursor:pointer}
 #pet img{width:100%;height:100%;object-fit:contain;display:block}
-#mode-label{position:absolute;bottom:2px;right:2px;font-size:9px;color:rgba(255,255,255,0.3);pointer-events:none;font-family:sans-serif}
 </style>
 </head>
 <body>
-<div id="pet">
-  <img id="pet-img" src="pet_frames/frame_01.png">
-  <div id="mode-label">·</div>
-</div>
+<div id="pet"><img id="pet-img" src="pet_frames/frame_01.png"></div>
 <script>
-// 静态池: frame_01~12 + frame_626~657 = 44张
-var staticFrames = [];
-for (var i = 1; i <= 12; i++) staticFrames.push(i);
-for (var i = 626; i <= 657; i++) staticFrames.push(i);
-var staticTotal = staticFrames.length;
-var staticIdx = 0;
-
-// 动图池: frame_25~625 = 601帧
-var animStart = 25;
-var animLen = 601;
-var animSpeed = 100;
-
-var isAnimating = false;
-var animTimer = null;
+var frames = [];
+for (var i = 1; i <= 12; i++) frames.push(i);
+for (var i = 626; i <= 657; i++) frames.push(i);
+var total = frames.length;
+var idx = 0;
 var petImg = document.getElementById('pet-img');
-var modeLabel = document.getElementById('mode-label');
-
 function pad(n) { return n < 10 ? '0' + n : String(n); }
-
-function loadStatic(idx) {
-  var n = staticFrames[idx];
-  petImg.src = 'pet_frames/frame_' + pad(n) + '.png';
-}
-
-function loadAnim(pos) {
-  petImg.src = 'pet_frames/anim/frame_' + pad(pos) + '.png';
-}
-
-function startAnim() {
-  if (isAnimating) return;
-  isAnimating = true;
-  modeLabel.textContent = '▶';
-  var pos = animStart;
-  loadAnim(pos);
-  animTimer = setInterval(function() {
-    pos++;
-    if (pos >= animStart + animLen) pos = animStart;
-    loadAnim(pos);
-  }, animSpeed);
-}
-
-function stopAnim() {
-  if (!isAnimating) return;
-  isAnimating = false;
-  if (animTimer) { clearInterval(animTimer); animTimer = null; }
-  modeLabel.textContent = '·';
-  // 回到当前静态帧
-  loadStatic(staticIdx);
-}
-
 function nextFrame() {
-  staticIdx = (staticIdx + 1) % staticTotal;
-  loadStatic(staticIdx);
+    idx = (idx + 1) % total;
+    petImg.src = 'pet_frames/frame_' + pad(frames[idx]) + '.png';
 }
-
-var tapTimer = null;
-var isLongPress = false;
+var tapTimer = null, isLong = false;
 var pet = document.getElementById('pet');
-
+function endHandler() {
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+    if (!isLong) { nextFrame(); }
+}
 pet.addEventListener('touchstart', function(e) {
-  if (e.touches.length > 1) return;
-  isLongPress = false;
-  tapTimer = setTimeout(function() {
-    isLongPress = true;
-    if (isAnimating) stopAnim(); else startAnim();
-  }, 500);
+    if (e.touches.length > 1) return;
+    isLong = false;
+    tapTimer = setTimeout(function(){ isLong = true }, 500);
 }, {passive:true});
-
-pet.addEventListener('touchend', function(e) {
-  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
-  if (!isLongPress) {
-    if (isAnimating) stopAnim();
-    nextFrame();
-  }
-}, {passive:true});
-
+pet.addEventListener('touchend', endHandler, {passive:true});
 pet.addEventListener('touchmove', function(e) {
-  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
 }, {passive:true});
-
-// 鼠标
-pet.addEventListener('mousedown', function(e) {
-  isLongPress = false;
-  tapTimer = setTimeout(function() {
-    isLongPress = true;
-    if (isAnimating) stopAnim(); else startAnim();
-  }, 500);
+pet.addEventListener('mousedown', function() {
+    isLong = false;
+    tapTimer = setTimeout(function(){ isLong=true }, 500);
 });
-pet.addEventListener('mouseup', function(e) {
-  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
-  if (!isLongPress) {
-    if (isAnimating) stopAnim();
-    nextFrame();
-  }
-});
-pet.addEventListener('mouseleave', function(e) {
-  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+pet.addEventListener('mouseup', endHandler);
+pet.addEventListener('mouseleave', function() {
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer=null; }
 });
 
 // 拖拽
-var isDragging = false, startX, startY, startLeft, startTop;
-pet.addEventListener('touchstart', function(e) {
-  if (e.touches.length === 1 && !tapTimer) {
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    startLeft = pet.offsetLeft;
-    startTop = pet.offsetTop;
-  }
+var isDragging=false, startX, startY, startLeft, startTop;
+pet.addEventListener('touchstart', function(e){
+    if(e.touches.length===1 && !tapTimer) {
+        isDragging=true;
+        startX=e.touches[0].clientX;
+        startY=e.touches[0].clientY;
+        startLeft=pet.offsetLeft;
+        startTop=pet.offsetTop;
+    }
 }, {passive:true});
-pet.addEventListener('touchmove', function(e) {
-  if (isDragging && e.touches.length === 1) {
-    pet.style.left = (startLeft + e.touches[0].clientX - startX) + 'px';
-    pet.style.top = (startTop + e.touches[0].clientY - startY) + 'px';
-  }
+pet.addEventListener('touchmove', function(e){
+    if(isDragging && e.touches.length===1) {
+        pet.style.left=(startLeft+e.touches[0].clientX-startX)+'px';
+        pet.style.top=(startTop+e.touches[0].clientY-startY)+'px';
+    }
 }, {passive:true});
-pet.addEventListener('touchend', function(e) { isDragging = false; }, {passive:true});
+pet.addEventListener('touchend', function(){ isDragging=false }, {passive:true});
 
 // 双指缩放
-var lastDist = 0, currentScale = 1;
-pet.addEventListener('touchstart', function(e) {
-  if (e.touches.length === 2) {
-    lastDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-  }
+var lastDist=0, currentScale=1;
+pet.addEventListener('touchstart', function(e){
+    if(e.touches.length===2) {
+        lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    }
 }, {passive:true});
-pet.addEventListener('touchmove', function(e) {
-  if (e.touches.length === 2) {
-    var dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    currentScale *= dist / lastDist;
-    currentScale = Math.max(0.3, Math.min(5, currentScale));
-    pet.style.transform = 'scale(' + currentScale + ')';
-    lastDist = dist;
-  }
+pet.addEventListener('touchmove', function(e){
+    if(e.touches.length===2) {
+        var dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        currentScale*=dist/lastDist;
+        currentScale=Math.max(0.3,Math.min(5,currentScale));
+        pet.style.transform='scale('+currentScale+')';
+        lastDist=dist;
+    }
 }, {passive:true});
 </script>
 </body>
